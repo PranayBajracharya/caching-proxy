@@ -1,0 +1,4 @@
+*.db
+tmp/
+.air.toml
+.DS_Store
