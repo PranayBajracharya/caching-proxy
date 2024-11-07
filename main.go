@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 )
@@ -22,6 +21,12 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
+			entry, ok := getFromCache(r.URL.Path)
+			if ok {
+				sendCachedResponse(w, entry)
+				return
+			}
+			forwardRequest(*origin, w, r)
 			fmt.Printf("GET request from %s\n", r.URL.Path)
 		} else {
 			forwardRequest(*origin, w, r)
@@ -39,40 +44,4 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-func forwardRequest(origin string, w http.ResponseWriter, r *http.Request) {
-	client := &http.Client{}
-
-	forwardURL := origin + r.URL.Path
-	req, err := http.NewRequest(r.Method, forwardURL, r.Body)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Copy headers from original request
-	for key, values := range r.Header {
-		for _, value := range values {
-			req.Header.Add(key, value)
-		}
-	}
-
-	res, err := client.Do(req)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer res.Body.Close()
-
-	w.WriteHeader(res.StatusCode)
-	for key, values := range res.Header {
-		for _, value := range values {
-			w.Header().Add(key, value)
-		}
-	}
-
-	io.Copy(w, res.Body)
 }
