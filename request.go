@@ -8,7 +8,7 @@ import (
 func forwardRequest(origin string, w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 
-	forwardURL := origin + r.URL.Path
+	forwardURL := origin + r.URL.String()
 	req, err := http.NewRequest(r.Method, forwardURL, r.Body)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func forwardRequest(origin string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		addToCache(r.URL.Path, CacheEntry{res.StatusCode, body, res.Header})
+		addToCache(r.URL.String(), CacheEntry{res.StatusCode, body, res.Header})
 	}
 
 	for key, values := range res.Header {

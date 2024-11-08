@@ -21,16 +21,16 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			entry, ok := getFromCache(r.URL.Path)
+			entry, ok := getFromCache(r.URL.String())
 			if ok {
 				sendCachedResponse(w, entry)
 				return
 			}
 			forwardRequest(*origin, w, r)
-			fmt.Printf("GET request from %s\n", r.URL.Path)
+			fmt.Printf("GET request from %s\n", r.URL.String())
 		} else {
 			forwardRequest(*origin, w, r)
-			fmt.Printf("%s request from %s\n", r.Method, r.URL.Path)
+			fmt.Printf("%s request from %s\n", r.Method, r.URL.String())
 			return
 		}
 	})
