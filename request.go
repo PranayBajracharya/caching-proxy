@@ -39,7 +39,7 @@ func forwardRequest(origin string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		addToCache(r.URL.String(), CacheEntry{res.StatusCode, body, res.Header})
+		go addToCache(r.URL.String(), CacheEntry{res.StatusCode, body, res.Header})
 	}
 
 	for key, values := range res.Header {
